@@ -21,10 +21,7 @@ app.get("/", (req, res)=>{
     })
 })
 
-app.listen(PORT,()=>{
-    console.log(`Servidor corriendo en el puerto ${PORT}`)
-    
-})
+
 
 app.post("/login", (req, res)=>{
     const {email, password} = req.body
@@ -52,3 +49,45 @@ app.post("/login", (req, res)=>{
     })
 })
 
+/*
+        Middleware para verificar el token
+        Esta función comprobará si el usuario envió un jwt válido
+*/
+function verifyToken(req, res, next){
+    //Obtenemos el encabezado de Authorization
+    //Enviado por el cliente(React native)
+    const authorization = req.headers.authorization
+    //Si no existe Authorization,
+    //significa que el cliente no envió el token
+    if(!authorization){
+        //Respondemos con el codigo http 401 (Unauthorized)
+        return res.status(401).json({
+            mensaje: "No se envió el token"
+        })
+    }
+    //El encabezado normalmente tiene esta forma:
+    //"Bearer jsadfljklsdjfejojiosidfjodj"
+    //Separamos el texto utilizando el espacio
+    const partes = authorization.split(" ")
+    //Comprobamos que existan exactamente dos partes,
+    //que la primera sea 'Bearer' y que aya un token.
+    if(
+       partes.length !== 2 ||
+       partes[0] !== 'Bearer' ||
+       !partes[1]
+    ){
+        //Si el formato es incorrecto, 
+        //rechazamos la petición.
+        return res.status(401).json({
+            mensaje: "Formato de token incorrecto"
+        })
+    }
+    //Extraemos la segunda parte del encabezado,
+    //que contiene el JwT
+    const token = partes[1]
+}
+
+app.listen(PORT,()=>{
+    console.log(`Servidor corriendo en el puerto ${PORT}`)
+    
+})
