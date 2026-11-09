@@ -85,6 +85,31 @@ function verifyToken(req, res, next){
     //Extraemos la segunda parte del encabezado,
     //que contiene el JwT
     const token = partes[1]
+    //Intentamos verificar el token
+    try{
+        //Jwt.verify comprueba la firma del JWT
+        //utilizando nuestra clave secreta. 
+        //tambien comprueba su expiración.
+        const datos = jwt.verify(
+            token,
+            SECRET_KEY,
+            {
+                algorithms: ["HS256"]
+            }
+        )
+        //Guardamos el contenido verificado del token 
+        //en una nueva propiedad de req
+        req.user = datos
+        //Permitimos que express continue.
+        //ejecutando la siguiente función.
+        next()
+    }catch(error){
+        //Si el token es falso, está modificado
+        //o ha expirado, jwt.verify lanzará un error.
+        return res.status(401).json({
+            mensaje: "Token inválido o expirado"
+        })
+    }
 }
 
 app.listen(PORT,()=>{
